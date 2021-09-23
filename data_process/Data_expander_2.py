@@ -11,8 +11,8 @@ def cv_imread(filePath):
 def show_img(name,img):
     cv2.namedWindow(name, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(name, 300, 500)
-    cv2.imshow(name, img)
     cv2.waitKey()
+    cv2.imshow(name, img)
 
 def random_mask(filename,blocks=0):
     img = cv_imread(filename)
