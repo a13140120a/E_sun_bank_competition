@@ -10,6 +10,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint,ReduceLROn
 from CLR import CyclicLR
 from itertools import product
 import random
+from data_process import Data_expander_2
 CUDA_VISIBLE_DEVICES=0,1,2
 
 
@@ -29,7 +30,6 @@ class MyInceptionResNetV2_with_CLR:
                                   input_shape=(self.img_size[0],self.img_size[1],3)
         )
         self.Backbone.trainable = True
-        #self.set_backbone_trainable(tops=5)
         self.model = Sequential()
         self.model.add(self.Backbone)
         self.model.add(GlobalAvgPool2D())
@@ -108,7 +108,6 @@ class MyInceptionResNetV2_with_CLR:
 
     def train(self):
         self.model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['acc'] )
-        # 使用批量生成器 模型模型
         H = self.model.fit_generator(
             self.train_generator,
             steps_per_epoch=self.steps_per_epoch,
@@ -119,54 +118,8 @@ class MyInceptionResNetV2_with_CLR:
         )
         self.show_total_history_picture(H)
 
-    def random_mask(self,img, blocks=0):
-
-        img_high = img.shape[0]
-        img_width = img.shape[1]
-
-        img_high1, img_high2, img_high3, img_high4 = round(img_high * 0.2), round(img_high * 0.4), round(
-            img_high * 0.6), round(img_high * 0.8)
-        img_high_list = [0, img_high1, img_high2, img_high3, img_high4]
-
-        img_width1, img_width2, img_width3, img_width4 = round(img_width * 0.2), round(img_width * 0.4), round(
-            img_width * 0.6), round(img_width * 0.8)
-        img_width_list = [0, img_width1, img_width2, img_width3, img_width4]
-        # 切割成5*5個區塊
-        combine = list(product(img_high_list, img_width_list))
-        # 隨機抽取5個(取後不放回)
-        masks = random.sample(combine, blocks)
-
-        mask_high = round(img_high / 5)
-        mask_widght = round(img_width / 5)
-        for i in masks:
-            # y是橫軸，x是縱軸
-            (x, y) = i
-            # 第一個是橫軸，第二個是縱軸，所以這邊跟上面的high, width 相反
-            top_left = (y, x)
-            bottom_right_widght = y + mask_widght
-            bottom_right_high = x + mask_high
-            if y + img_width * 0.2 > img_width:
-                bottom_right_widght = img_width
-            if x + img_high * 0.2 > img_high:
-                bottom_right_high = img_high
-            bottom_right = (bottom_right_widght, bottom_right_high)
-
-            # cv2.rectangle(img, top_left, bottom_right, 0, -1)
-            img[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]] = 0
-        return img
-
     def preprocessing_fun(self,img):
-
-        # 查看
-        # new_img = np.array(img,dtype=np.uint8)
-        # new_img = random_mask(new_img,blocks=3)
-        # cv2.imshow('aa',new_img)
-        # cv2.waitKey(0)
-        # return img
-
-        # 執行
-        new_img = self.random_mask(img, blocks=5)
-
+        new_img = Data_expander_2.random_mask(img,blocks=5)
         return new_img
 
     def show_total_history_picture(self,H):

@@ -44,28 +44,9 @@ def random_mask(filename,blocks=0):
         bottom_right = (bottom_right_widght, bottom_right_high)
         print('top_left',top_left)
         print('bottom_right',bottom_right)
-        cv2.rectangle(img, top_left, bottom_right, 0, -1)
-        #img[top_left[1]:bottom_right[1],top_left[0]:bottom_right[0]]= 0
-        #show_img('aaa',img)
+        # cv2.rectangle(img, top_left, bottom_right, 0, -1)
+        img[top_left[1]:bottom_right[1],top_left[0]:bottom_right[0]]= 0
+        show_img('aaa',img)
     return img
 
-
-if __name__ =="__main__":
-    #mask區塊數量
-    blocks = 4
-    src_dir_name = 'train/'
-    target_dir_name = './test/'
-
-    for i in os.listdir(src_dir_name):
-        sub_folder = src_dir_name+i+'/'
-        for i in os.listdir(sub_folder):
-            print(sub_folder+i)
-
-            img1 = random_mask(sub_folder+i,blocks=blocks)
-            img2 = random_mask(sub_folder+i,blocks=blocks)
-            img3 = random_mask(sub_folder+i,blocks=blocks)
-            cv2.imencode('.jpg', img1)[1].tofile(sub_folder+'1_'+i)
-            cv2.imencode('.jpg', img2)[1].tofile(sub_folder+'2_'+i)
-            cv2.imencode('.jpg', img3)[1].tofile(sub_folder+'3_'+i)
-            #show_img('name',img1)
 
